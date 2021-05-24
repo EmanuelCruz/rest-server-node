@@ -1,6 +1,9 @@
 const express = require("express");
-const config = require("../../config");
 const morgan = require('morgan');
+const swaggerUi = require('swagger-ui-express');
+const config = require("../../config");
+const logger = require('../logger')
+// const swagger = require('../')
 
 class ExpressServer {
     constructor() {
@@ -9,13 +12,16 @@ class ExpressServer {
         this.basePath = config.api.prefix;
 
         this._middlewares();
+        this._swaggerConfig();
         this._routes();
+        this._notFound();
+        this._errorHandler();
     }
 
     /* va con _ porque es una funcion privada */
     _middlewares() {
         this.app.use(express.json());
-        this.app.use(morgan('tiny'))
+        this.app.use(morgan("tiny"));
     }
 
     _routes() {
@@ -26,11 +32,40 @@ class ExpressServer {
         this.app.use(`${this.basePath}/users`, require("../../routes/users"));
     }
 
+    _notFound() {
+        this.app.use((req, res, next) => {
+            const error = new Error("Not Found");
+            error.code = 404;
+            next(error);
+        });
+    }
+
+    _errorHandler() {
+        this.app.use((err, req, res, next) => {
+            const code = err.code || 500;
+            const body = {
+                error: {
+                    code,
+                    message: err.message,
+                },
+            };
+            res.status(code).json(body);
+        });
+    }
+
+    _swaggerConfig() {
+        this.app.use(
+            config.swagger.path,
+            swaggerUi.serve,
+            swaggerUi.setup(require('../swagger/suagger.json'))
+        );
+    }
+
     async start() {
         this.app.listen(this.port, (error) => {
             //valido si el puerto esta libre o esta en uso
             if (error) {
-                console.log(error);
+                logger.error(error);
                 process.exit(1);
                 return;
             }
