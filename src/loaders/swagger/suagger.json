@@ -24,24 +24,19 @@
   ],
   "tags": [
     {
-      "name": "admins",
-      "description": "Secured Admin-only calls"
-    },
-    {
-      "name": "developers",
-      "description": "Operations available to regular developers"
+      "name": "users",
+      "description": ""
     }
   ],
   "paths": {
     "/users": {
       "get": {
         "tags": [
-          "developers"
+          "users"
         ],
         "summary": "Returns a list of all users",
         "description": "",
         "operationId": "getAllUsers",
-        "parameters": [],
         "responses": {
           "200": {
             "description": "search results matching criteria",
@@ -50,7 +45,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/InventoryItem"
+                    "$ref": "#/components/schemas/User"
                   }
                 }
               }
@@ -63,7 +58,7 @@
       },
       "post": {
         "tags": [
-          "admins"
+          "users"
         ],
         "summary": "adds a new user",
         "description": "Adds a new user",
@@ -73,14 +68,21 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/InventoryItem"
+                "$ref": "#/components/schemas/UserName"
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "User created"
+            "description": "user created",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UserPostOutput"
+                  }
+                }
+              }
           },
           "400": {
             "description": "invalid input, object invalid"
@@ -91,88 +93,66 @@
         }
       }
     },
-    "/user/:id": {
+    "/users/{id}": {
         "put": {
           "tags": [
-            "developers"
+            "users"
           ],
           "summary": "Returns the modified user and a message",
           "description": "Edit user",
           "operationId": "updateUser",
           "parameters": [
-            
+            {
+              "name": "id",
+              "in": "path",
+              "description": "the id of the user that needs to be updated",
+              "required" : true,
+              "schema": {
+                "type": "integer"
+              }
+            }
           ],
+          "requestBody": {
+            "description": "Name User to update",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserName"
+                }
+              }
+            }
+          },
           "responses": {
             "200": {
               "description": "update user by id",
               "content": {
                 "application/json": {
                   "schema": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/InventoryItem"
-                    }
+                    "$ref": "#/components/schemas/UserPutOutput"
                   }
                 }
               }
-            },
-            "400": {
-              "description": "bad input parameter"
-            }
-          }
-        },
-        "patch": {
-          "tags": [
-            "developers"
-          ],
-          "summary": "Returns the modified user and a message",
-          "description": "Partial Update user",
-          "operationId": "updatePartialUser",
-          "parameters": [
-            
-          ],
-          "responses": {
-            "200": {
-              "description": "partial update user by id",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/InventoryItem"
-                    }
-                  }
-                }
-              }
-            },
-            "400": {
-              "description": "bad input parameter"
             }
           }
         },
         "delete": {
           "tags": [
-            "developers"
+            "users"
           ],
           "summary": "Returns a message",
           "description": "Delete user by id",
           "operationId": "deleteUser",
           "parameters": [
-            
+            {
+              "name": "id",
+              "in": "path",
+              "description": "the id of the user that needs to be deleted",
+              "required" : true
+            }
           ],
           "responses": {
             "200": {
-              "description": "delete user by id",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/InventoryItem"
-                    }
-                  }
-                }
-              }
+              "description": "delete user"
             },
             "400": {
               "description": "bad input parameter"
@@ -182,56 +162,49 @@
     }
   },
   "components": {
-    "schemas": {
-      "InventoryItem": {
-        "required": [
-          "id",
-          "manufacturer",
-          "name",
-          "releaseDate"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "example": "d290f1ee-6c54-4b01-90e6-d701748f0851"
+      "schemas": {
+          "User": {
+              "required": ["id"],
+              "type": "object",
+              "properties": {
+                  "id": {
+                      "type": "integer",
+                      "example": "1"
+                  },
+                  "name": {
+                      "type": "string",
+                      "example": "Emanuel"
+                  }
+              }
           },
-          "name": {
-            "type": "string",
-            "example": "Widget Adapter"
+          "UserName": {
+              "required": ["name"],
+              "type": "object",
+              "properties": {
+                  "name": {
+                      "type": "string",
+                      "example": "Emanuel"
+                  }
+              }
           },
-          "releaseDate": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2016-08-29T09:12:33.001Z"
+          "UserPostOutput": {
+              "type": "object",
+              "properties": {
+                  "message": "User created",
+                  "user": {
+                      "$ref": "#/components/schemas/User"
+                  }
+              }
           },
-          "manufacturer": {
-            "$ref": "#/components/schemas/Manufacturer"
+          "UserPutOutput": {
+              "type": "object",
+              "properties": {
+                  "message": "User updated",
+                  "user": {
+                    "$ref": "#/components/schemas/userName"
+                  }
+              }
           }
-        }
-      },
-      "Manufacturer": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "example": "ACME Corporation"
-          },
-          "homePage": {
-            "type": "string",
-            "format": "url",
-            "example": "https://www.acme-corp.com"
-          },
-          "phone": {
-            "type": "string",
-            "example": "408-867-5309"
-          }
-        }
       }
-    }
   }
 }

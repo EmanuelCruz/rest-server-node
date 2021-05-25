@@ -7,6 +7,8 @@ const express = require('express');
  */
 
 const getAllUsers = (req, res) => {
+
+    throw new Error('Error de testeo handler')
     const users = [
         {
             id: 1,
@@ -17,7 +19,6 @@ const getAllUsers = (req, res) => {
             name: "Lucas",
         },
     ];
-    throw new Error('Ocurrio un error al obtener un usuario en la base de datos')
     res.json(users);
 };
 
